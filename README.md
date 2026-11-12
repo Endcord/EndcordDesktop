@@ -61,12 +61,14 @@ Plugins you turn on may talk to their own services.
 
 ## Source and building
 
-The code is developed in [Endcord's repository](https://github.com/Endcord/Endcord):
+This repository has a copy of the app's own code, updated with each release, at the same paths as in [Endcord's repository](https://github.com/Endcord/Endcord), where it's developed:
 
-- [`desktop/`](https://github.com/Endcord/Endcord/tree/main/desktop) is the app around Discord's page.
-- The rest of the repository is the Endcord it loads.
+- [`desktop/`](desktop) is the app around Discord's page: the window, tray, taskbar, screen sharing and updates.
+- [`scripts/build/buildDesktopApp.mjs`](scripts/build/buildDesktopApp.mjs) builds it.
+- [`src/plugins/_core/desktopWindow.endcordDesktop.ts`](src/plugins/_core/desktopWindow.endcordDesktop.ts) is the part of Endcord only this app loads: Discord's own title bar and window buttons.
+- [`assets/`](assets) has its icons.
 
-You need Node.js 22 or newer and [pnpm](https://pnpm.io).
+The app loads the whole of Endcord, so it builds from Endcord's repository, not this one. You need Node.js 22 or newer and [pnpm](https://pnpm.io).
 
 ```sh
 git clone https://github.com/Endcord/Endcord.git
