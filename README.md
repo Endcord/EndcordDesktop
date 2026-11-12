@@ -35,7 +35,7 @@ Windows 10 and 11, 64-bit.
 Endcord Desktop hasn't had its first release yet. When it does, the setup will be on [endcord.com/download](https://endcord.com/download):
 
 1. Download `EndcordDesktopSetup.exe` and run it. It installs for your Windows account and needs no admin rights.
-2. It checks everything it downloads against Endcord's signed release, then adds Start menu and desktop shortcuts.
+2. It downloads the app from this repository's [releases](https://github.com/Endcord/EndcordDesktop/releases), checks everything against Endcord's signed release, then adds Start menu and desktop shortcuts.
 3. To remove it, open **Settings > Apps** and uninstall it. You can keep or delete your sign-in and settings.
 
 Windows will warn about the setup because it isn't code-signed yet.
