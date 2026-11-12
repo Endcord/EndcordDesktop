@@ -1,0 +1,75 @@
+name: Bug report
+description: Something in Endcord Desktop itself doesn't work, such as the window, tray, taskbar, screen sharing, setup or updates.
+labels: [bug]
+title: "[Bug] <title>"
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              This is for the app itself. A plugin that misbehaves goes to [Endcord's issues](https://github.com/Endcord/Endcord/issues), and help questions go to the [Endcord server](https://discord.gg/endcord).
+
+    - type: input
+      id: version
+      attributes:
+          label: Endcord Desktop version
+          description: The bottom of Discord's settings sidebar shows it. If the app won't open, write the version you installed.
+          placeholder: "Endcord 2ab4baf (Endcord Desktop v1.0.0)"
+      validations:
+          required: true
+
+    - type: input
+      id: windows
+      attributes:
+          label: Windows version
+          placeholder: "Windows 11 24H2"
+      validations:
+          required: true
+
+    - type: textarea
+      id: what-happens
+      attributes:
+          label: What happens?
+          description: What goes wrong, and when.
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: What did you expect?
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: How can we make it happen?
+          description: The steps, in order. Say which plugins are on if they might matter.
+          placeholder: |
+              1. Open ...
+              2. Click ...
+              3. See ...
+      validations:
+          required: true
+
+    - type: textarea
+      id: errors
+      attributes:
+          label: Errors
+          description: Press `Ctrl+Shift+I` or `F12` in the app and paste any red errors from the Console. Network errors like "Failed to load resource" can be left out.
+          render: text
+      validations:
+          required: false
+
+    - type: checkboxes
+      id: agreement
+      attributes:
+          label: Checks
+          options:
+              - label: I searched the existing issues and this hasn't been reported yet
+                required: true
+              - label: I installed Endcord Desktop from endcord.com or built it from Endcord's source
+                required: true
+              - label: This is not a support question
+                required: true

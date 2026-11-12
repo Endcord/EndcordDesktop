@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+    - name: Endcord server
+      url: https://discord.gg/endcord
+      about: Help, questions and plugin requests
+    - name: A plugin misbehaves
+      url: https://github.com/Endcord/Endcord/issues
+      about: Plugin bugs go to Endcord's issues
+    - name: Security problem
+      url: https://github.com/Endcord/Endcord/security/advisories/new
+      about: Report vulnerabilities privately, not as an issue

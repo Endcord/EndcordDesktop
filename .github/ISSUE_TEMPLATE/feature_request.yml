@@ -1,0 +1,35 @@
+name: Feature request
+description: An idea for the app itself. Plugin ideas go to the Endcord server.
+labels: [enhancement]
+title: "[Feature] <title>"
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              This is for Endcord Desktop itself: the window, tray, taskbar, setup and what the app can do that a browser can't. New plugins and plugin features go to the [Endcord server](https://discord.gg/endcord).
+
+    - type: textarea
+      id: feature
+      attributes:
+          label: What would you like the app to do?
+      validations:
+          required: true
+
+    - type: textarea
+      id: why
+      attributes:
+          label: Why
+          description: What it would help with. Discord's own app doing it is a fine reason.
+      validations:
+          required: false
+
+    - type: checkboxes
+      id: agreement
+      attributes:
+          label: Checks
+          options:
+              - label: I searched the existing issues and this hasn't been suggested yet
+                required: true
+              - label: This is about the app, not a plugin
+                required: true
