@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0+electron45.2.2",
+  "hash": "0bc884a",
+  "updatedAt": 1794771814474,
+  "date": "2026-11-15T19:43:34.474Z",
+  "downloadUrl": "https://endcord.com/download",
+  "installerSha256": "181ad91d2325df6cfa5586d0868c5fb1a2ce378df6e7b2ecd8c55be6eb5ecc3f",
+  "signature": "MEUCIQDN4eV5lX+qNdO92qVGUl4WJzPaopPoZNhFpsqZNORSFQIgZKVdHJ3/ot6glgj9sy678+tcSK3sl937CgsJrUEFIDI=",
+  "assets": [
+    {
+      "name": "endcordDesktopMain.js",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/endcordDesktopMain.js",
+      "sha256": "7fa9c90bf5590d84e39704a25b2763ce09caec7e66d5e2d69e80a25e6019c7e2"
+    },
+    {
+      "name": "endcordDesktopPreload.js",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/endcordDesktopPreload.js",
+      "sha256": "58fad439e93d71b35b1f0fa3f07b6fec14a2a084a695329a5e22ca934e3ea431"
+    },
+    {
+      "name": "endcordDesktopRenderer.js",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/endcordDesktopRenderer.js",
+      "sha256": "e1b0de188a4989593f4edcbb279c4a332a9b2064610aa6873e919b1c5a7314b7"
+    },
+    {
+      "name": "endcordDesktopRenderer.css",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/endcordDesktopRenderer.css",
+      "sha256": "a16f277c2e0c9cc233b83c08f2ef1d824737b31c0a8e16e33e5d61b91b117585"
+    },
+    {
+      "name": "main.js",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/main.js",
+      "sha256": "c5866bcf78ea9e82c599c3cdc9561fca796a920766796f42c7cb6bbec90f4857"
+    },
+    {
+      "name": "preload.js",
+      "url": "https://raw.githubusercontent.com/Endcord/EndcordDesktop/main/dist/preload.js",
+      "sha256": "5f3655f91624dc5c5fbcd89c9451d8be98e4db288821e8a78f80519ee704a384"
+    }
+  ]
+}

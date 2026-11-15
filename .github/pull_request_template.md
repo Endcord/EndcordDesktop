@@ -1,5 +1,8 @@
 <!--
-The code here is a copy of Endcord Desktop's code in Endcord's repository, updated with each release, so a pull
-request here can't be merged. Please open it at https://github.com/Endcord/Endcord instead: the files are at the
-same paths there.
+Pull requests here are for Endcord Desktop's own code: desktop/, scripts/build/buildDesktopApp.mjs, test/desktop.mjs,
+src/plugins/_core/ and assets/. A plugin or Endcord's settings belong in https://github.com/Endcord/Endcord instead.
 -->
+
+**What it changes:**
+
+**How it was tested** (Windows version, signed in or out):
