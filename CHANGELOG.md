@@ -2,6 +2,20 @@
 
 What changed in each Endcord Desktop release.
 
+## Update of 2026-11-20 (with Endcord 4.1.2)
+
+The app stays 1.0.0 and installed copies update on their own. Everything in [Endcord 4.1.2](https://github.com/Endcord/Endcord/blob/main/CHANGELOG.md) is in it, and:
+
+### Fixed
+
+- When Discord's page doesn't load, for example when the app starts with Windows before the network is up, the app tries again instead of staying blank.
+- Restart from Endcord's settings no longer hides the window in the tray when the app had started with Windows.
+- A window saved on a monitor that's no longer connected opens on a screen you have.
+- Game Mode tries Discord's list of games again when it couldn't get it, and looks up the running programs by Windows' full path to `tasklist`.
+- discord:// links with `.` or `..` in their path are refused.
+- The screen share picker ignores key presses that a page makes up, and speaks Spanish, French and Russian too.
+- FileUpload and ZIP+ upload through the app's own process, and SekaiStickers and TriviaAI reach their servers (their hosts were missing from the content security policy).
+
 ## 1.0.0 (2026-11-15)
 
 The first release. Endcord Desktop is Endcord's own app around Discord's web app, with every Endcord plugin and theme built in.

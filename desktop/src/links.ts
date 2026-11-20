@@ -28,7 +28,8 @@ export function discordLinkTarget(argv: readonly string[]) {
     if (!link) return null;
     // discord://-/channels/1/2 and discord:///invite/abc both name a path on discord.com
     const path = link.slice(`${PROTOCOL}://`.length).replace(/^-?\/+/, "").replace(/\/+$/, "");
-    if (path.length > 300 || !/^[\w@.-]+(?:\/[\w@.-]+)*$/.test(path) || !PAGES.has(path.split("/")[0])) return null;
+    // A "." or ".." part would lead the URL out of the page it names
+    if (path.length > 300 || !/^[\w@.-]+(?:\/[\w@.-]+)*$/.test(path) || /(?:^|\/)\.+(?:\/|$)/.test(path) || !PAGES.has(path.split("/")[0])) return null;
     return `https://discord.com/${path}`;
 }
 

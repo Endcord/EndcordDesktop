@@ -20,6 +20,9 @@ import { DesktopIpc } from "./ipc";
 const LIST_URL = "https://discord.com/api/v9/applications/detectable";
 const LIST_MAX_AGE = 7 * 24 * 60 * 60_000;
 const SCAN_EVERY = 20_000;
+// After a fetch that left no list (offline, Discord down)
+const LIST_RETRY = 10 * 60_000;
+const TASKLIST = join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tasklist.exe");
 
 // Names that ordinary programs share with a few entries of Discord's list
 const NOT_GAMES = new Set([
@@ -27,14 +30,20 @@ const NOT_GAMES = new Set([
     "build.exe", "cmd.exe", "conhost.exe", "explorer.exe", "chrome.exe", "msedge.exe", "firefox.exe", "code.exe"
 ]);
 
-// One win32 executable of the list, launchers left out. Read with a pattern, not JSON.parse: the list is 13 MB of
-// JSON for a few hundred KB of names
-const EXECUTABLE = /\{(?:"arguments":\s*"(?:[^"\\]|\\.)*",\s*)?"is_launcher":\s*false,\s*"name":\s*"((?:[^"\\]|\\.)*)",\s*"os":\s*"win32"\}/g;
+// A flat object of the list, as each executable is, its keys in any order. Read with a pattern, not JSON.parse: the
+// list is 13 MB of JSON for a few hundred KB of names
+const FIELD = String.raw`"\w+":\s*(?:"(?:[^"\\]|\\.)*"|true|false|null|-?\d+)`;
+const EXECUTABLE = new RegExp(String.raw`\{\s*${FIELD}(?:\s*,\s*${FIELD})*\s*\}`, "g");
+const WIN32 = /"os":\s*"win32"/;
+const NOT_LAUNCHER = /"is_launcher":\s*false/;
+const NAME = /"name":\s*"((?:[^"\\]|\\.)*)"/;
 
 /** The executable names in Discord's list of detectable games: file names only, lowercase */
 export function parseDetectable(text: string) {
     const names = new Set<string>();
-    for (const [, raw] of text.matchAll(EXECUTABLE)) {
+    for (const [entry] of text.matchAll(EXECUTABLE)) {
+        const raw = WIN32.test(entry) && NOT_LAUNCHER.test(entry) && NAME.exec(entry)?.[1];
+        if (!raw) continue;
         let name: string;
         try {
             name = JSON.parse(`"${raw}"`);
@@ -72,7 +81,7 @@ async function loadGameNames(): Promise<Set<string>> {
 
 function runningPrograms() {
     return new Promise<string[]>(resolve => {
-        execFile("tasklist", ["/fo", "csv", "/nh"], { windowsHide: true, maxBuffer: 4 * 1024 * 1024 }, (error, stdout) => resolve(error ? [] : parseTasklist(stdout)));
+        execFile(TASKLIST, ["/fo", "csv", "/nh"], { windowsHide: true, maxBuffer: 4 * 1024 * 1024 }, (error, stdout) => resolve(error ? [] : parseTasklist(stdout)));
     });
 }
 
@@ -80,11 +89,23 @@ export function watchGames(win: BrowserWindow) {
     if (process.platform !== "win32") return;
     let watching = false;
     let names: Promise<Set<string>> | undefined;
+    let noListSince = 0;
     let timer: ReturnType<typeof setInterval> | undefined;
     let reported = "";
 
+    function gameNames() {
+        if (!names || (noListSince && Date.now() - noListSince > LIST_RETRY)) {
+            noListSince = 0;
+            names = loadGameNames().catch(() => new Set<string>()).then(list => {
+                if (!list.size) noListSince = Date.now();
+                return list;
+            });
+        }
+        return names;
+    }
+
     async function scan() {
-        const games = await names!;
+        const games = await gameNames();
         if (!watching || !games.size || win.isDestroyed()) return;
         const running = [...new Set((await runningPrograms()).filter(name => games.has(name)))].sort();
         const key = running.join("\n");
@@ -116,7 +137,7 @@ export function watchGames(win: BrowserWindow) {
     ipcMain.handle(DesktopIpc.GAMES_WATCH, (event, on: boolean) => {
         if (!fromDiscord(event)) return;
         watching = on === true;
-        if (watching) names ??= loadGameNames();
+        if (watching) gameNames();
         else reported = "";
         schedule();
     });

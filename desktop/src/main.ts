@@ -9,7 +9,7 @@
 // this app only makes the window and gives it what Discord's own app would: a tray, notifications, a taskbar badge,
 // text field menus and screen sharing. Each of those costs nothing until it's used.
 
-import { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, session, type Tray, type WebContents } from "electron";
+import { app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, screen, session, type Tray, type WebContents } from "electron";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
@@ -93,14 +93,15 @@ function start() {
         if (!win) return;
         showWindow(win);
         const target = discordLinkTarget(argv);
-        if (target) win.loadURL(target);
+        // A failed load is retried by the window's did-fail-load handler
+        if (target) win.loadURL(target).catch(() => { });
     });
     app.on("open-url", (event, url) => {
         event.preventDefault();
         const target = discordLinkTarget([url]);
         if (!win || !target) return;
         showWindow(win);
-        win.loadURL(target);
+        win.loadURL(target).catch(() => { });
     });
     app.on("activate", () => win && showWindow(win));
     app.on("before-quit", () => quitting = true);
@@ -169,10 +170,24 @@ interface WindowState { x?: number; y?: number; width: number; height: number; m
 
 const WINDOW_STATE_FILE = join(USER_DATA, "window-state.json");
 
+/** Whether the window's top strip, Discord's title bar and the only place to drag a frameless window, is on a display */
+function onScreen(x: number, y: number, width: number) {
+    return screen.getAllDisplays().some(({ workArea: area }) =>
+        Math.min(x + width, area.x + area.width) - Math.max(x, area.x) >= 100 && Math.min(y + 32, area.y + area.height) - Math.max(y, area.y) >= 16);
+}
+
+/** Only after the app is ready: the position is checked against the displays */
 function readWindowState(): WindowState {
     try {
         const state = JSON.parse(readFileSync(WINDOW_STATE_FILE, "utf-8"));
-        if (state.width >= 400 && state.height >= 300) return state;
+        if (Number.isFinite(state.width) && Number.isFinite(state.height) && state.width >= 400 && state.height >= 300) {
+            // Saved on a display that's gone (a monitor unplugged, a new layout): centred on the main one instead
+            if (!Number.isFinite(state.x) || !Number.isFinite(state.y) || !onScreen(state.x, state.y, state.width)) {
+                const area = screen.getPrimaryDisplay().workArea;
+                return { width: Math.min(state.width, area.width), height: Math.min(state.height, area.height), maximized: state.maximized === true };
+            }
+            return state;
+        }
     } catch { }
     return { width: 1280, height: 760, maximized: false };
 }
@@ -188,6 +203,9 @@ function createWindow(hidden: boolean, url: string) {
         minWidth: 940,
         minHeight: 500,
         show: false,
+        // Opaque on purpose, and Endcord's Window settings (transparency, Windows material, vibrancy) are hidden here:
+        // transparent: true leaves a Windows window unable to resize or maximize. A theme that expects a see-through
+        // window (Translucence) shows this colour behind it
         backgroundColor: BACKGROUND,
         autoHideMenuBar: true,
         icon: iconFile(),
@@ -250,8 +268,35 @@ function createWindow(hidden: boolean, url: string) {
         if (crashes.length <= 3) setTimeout(() => win.isDestroyed() || webContents.reload(), 1000);
     });
 
+    // Without a connection (a start at sign-in before the network is up) the page fails and the window stays empty:
+    // tried again after 5 s, 10 s, then every 30 s, and at once when the window is shown. Ctrl+R, Alt+F4 and the
+    // tray keep working meanwhile
+    let failedUrl: string | null = null;
+    let failures = 0;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    const loadFailed = () => {
+        clearTimeout(retry);
+        if (failedUrl && !win.isDestroyed()) win.loadURL(failedUrl).catch(() => { });
+    };
+    webContents.on("did-fail-load", (_event, code, _description, validatedUrl, isMainFrame) => {
+        // -3 is ERR_ABORTED: a load replaced by the next one
+        if (!isMainFrame || code === -3 || !isDiscordUrl(validatedUrl)) return;
+        failedUrl = validatedUrl;
+        clearTimeout(retry);
+        retry = setTimeout(loadFailed, [5, 10, 30][Math.min(failures++, 2)] * 1000);
+    });
+    // Error pages don't count as a navigation
+    webContents.on("did-navigate", () => {
+        failedUrl = null;
+        failures = 0;
+        clearTimeout(retry);
+    });
+    win.on("show", () => failedUrl && loadFailed());
+    win.on("closed", () => clearTimeout(retry));
+
     setWindowIcon(win);
-    win.loadURL(url);
+    // A failure is handled by did-fail-load above
+    win.loadURL(url).catch(() => { });
     return win;
 }
 
@@ -277,7 +322,8 @@ function setUpSession() {
 
 ipcMain.handle(DesktopIpc.RELAUNCH, event => {
     if (!fromDiscord(event)) return;
-    app.relaunch();
+    // Without what only this start was for: one started at sign-in would stay in the tray, a link would open again
+    app.relaunch({ args: process.argv.slice(1).filter(arg => arg !== HIDDEN_ARG && !arg.toLowerCase().startsWith("discord://")) });
     quit();
 });
 

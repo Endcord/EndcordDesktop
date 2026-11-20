@@ -30,5 +30,6 @@ export function isDiscordUrl(url: string) {
 export const fromDiscord = (event: IpcMainEvent | IpcMainInvokeEvent) => !!event.senderFrame && isDiscordUrl(event.senderFrame.url);
 
 export function openExternally(url: string) {
+    // eslint-disable-next-line no-restricted-syntax -- checked on this line
     if (isSafeExternalUrl(url)) shell.openExternal(url);
 }

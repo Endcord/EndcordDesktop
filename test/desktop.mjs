@@ -25,7 +25,7 @@ function check(name, ok, detail = "") {
 const ELECTRON_STUB = `
 const s = globalThis.__electron;
 export const app = s.app, BrowserWindow = s.BrowserWindow, clipboard = s.clipboard, desktopCapturer = s.desktopCapturer,
-    ipcMain = s.ipcMain, Menu = s.Menu, nativeImage = s.nativeImage, net = s.net, session = s.session, shell = s.shell, Tray = s.Tray;
+    ipcMain = s.ipcMain, Menu = s.Menu, nativeImage = s.nativeImage, net = s.net, screen = s.screen, session = s.session, shell = s.shell, Tray = s.Tray;
 `;
 // The process list games are looked for in (desktop/src/games.ts)
 const CHILD_PROCESS_STUB = `
@@ -88,7 +88,7 @@ async function start(args = []) {
             state.windows.push(this);
             emit(state.appEvents, "web-contents-created", {}, this.webContents);
         }
-        loadURL(url) { this.url = url; }
+        loadURL(url) { this.url = url; return Promise.resolve(); }
         show() { this.visible = true; emit(this.events, "show"); }
         hide() { this.visible = false; }
         focus() { this.focused = true; }
@@ -130,6 +130,7 @@ async function start(args = []) {
         },
         BrowserWindow: Object.assign(FakeWindow, { fromWebContents: () => state.windows[0], getAllWindows: () => state.windows }),
         Tray: FakeTray,
+        screen: { getAllDisplays: () => [{ workArea: { x: 0, y: 0, width: 1920, height: 1040 } }], getPrimaryDisplay: () => ({ workArea: { x: 0, y: 0, width: 1920, height: 1040 } }) },
         clipboard: { writeImage() { }, writeText(text) { state.copied = text; } },
         desktopCapturer: { getSources: async () => [{ id: "screen:0:0", name: "Screen", thumbnail: { toJPEG: () => Buffer.from("jpeg") } }] },
         ipcMain: { handle: (channel, fn) => { state.ipc[channel] = fn; }, on: (channel, fn) => { state.ipc[channel] = fn; } },

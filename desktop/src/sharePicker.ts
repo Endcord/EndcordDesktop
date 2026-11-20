@@ -9,9 +9,13 @@
 
 import type { PickedSource, ShareSource } from "./ipc";
 
+// The languages of desktop/src/strings.ts
 const STRINGS = {
     en: { title: "Share your screen", screens: "Screens", windows: "Windows", audio: "Share sound too", audioHint: "Everything the computer plays is shared, except Endcord's own sound, so the call doesn't hear itself", audioHintAll: "Everything the computer plays is shared, voice chat included", cancel: "Cancel", share: "Share", none: "Nothing to share was found" },
     tr: { title: "Ekranını paylaş", screens: "Ekranlar", windows: "Pencereler", audio: "Sesi de paylaş", audioHint: "Bilgisayarda çalan her ses paylaşılır, Endcord'un kendi sesi hariç: sohbet kendini duymaz", audioHintAll: "Bilgisayarda çalan her ses paylaşılır, sesli sohbet de dahil", cancel: "Vazgeç", share: "Paylaş", none: "Paylaşılacak bir şey bulunamadı" },
+    es: { title: "Compartir pantalla", screens: "Pantallas", windows: "Ventanas", audio: "Compartir también el sonido", audioHint: "Se comparte todo lo que suena en el equipo, salvo el sonido de Endcord, para que la llamada no se oiga a sí misma", audioHintAll: "Se comparte todo lo que suena en el equipo, chat de voz incluido", cancel: "Cancelar", share: "Compartir", none: "No se encontró nada que compartir" },
+    fr: { title: "Partager l'écran", screens: "Écrans", windows: "Fenêtres", audio: "Partager aussi le son", audioHint: "Tout ce que l'ordinateur joue est partagé, sauf le son d'Endcord, pour que l'appel ne s'entende pas lui-même", audioHintAll: "Tout ce que l'ordinateur joue est partagé, chat vocal compris", cancel: "Annuler", share: "Partager", none: "Rien à partager n'a été trouvé" },
+    ru: { title: "Демонстрация экрана", screens: "Экраны", windows: "Окна", audio: "Передавать и звук", audioHint: "Передаётся весь звук компьютера, кроме звука самого Endcord, чтобы в звонке не было эха", audioHintAll: "Передаётся весь звук компьютера, включая голосовой чат", cancel: "Отмена", share: "Показать", none: "Нечего показать" },
 };
 
 const CSS = `
@@ -69,7 +73,8 @@ let keyHandler: ((event: KeyboardEvent) => boolean) | null = null;
  */
 export function listenForPickerKeys() {
     window.addEventListener("keydown", event => {
-        if (!keyHandler?.(event)) return;
+        // The page can dispatch a keydown of its own; only the user's keys answer the picker
+        if (!event.isTrusted || !keyHandler?.(event)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
     }, true);
@@ -80,7 +85,7 @@ export function listenForPickerKeys() {
  * leaves this app's sound out of the shared sound (see LOOPBACK in desktop/src/share.ts)
  */
 export function showSharePicker(sources: ShareSource[], canShareAudio: boolean, ownSoundLeftOut: boolean) {
-    const text = navigator.language.toLowerCase().startsWith("tr") ? STRINGS.tr : STRINGS.en;
+    const text = (STRINGS as Record<string, typeof STRINGS.en>)[navigator.language.slice(0, 2).toLowerCase()] ?? STRINGS.en;
 
     return new Promise<PickedSource | null>(resolve => {
         const host = document.createElement("endcord-share-picker");
@@ -117,7 +122,7 @@ export function showSharePicker(sources: ShareSource[], canShareAudio: boolean, 
                 // own key handlers can take Enter before the listener below sees it, but not the button's own click
                 card.addEventListener("click", event => {
                     select(source.id);
-                    if (event.detail === 0) share();
+                    if (event.detail === 0 && event.isTrusted) share();
                 });
                 card.addEventListener("dblclick", () => {
                     select(source.id);
