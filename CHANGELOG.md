@@ -2,6 +2,10 @@
 
 What changed in each Endcord Desktop release.
 
+## Update of 2026-11-25 (with Endcord 4.1.3)
+
+The app stays 1.0.0 and installed copies update on their own. Everything in [Endcord 4.1.3](https://github.com/Endcord/Endcord/blob/main/CHANGELOG.md) is in it: CustomProfile uses the Endcord server's new profiles channel, and FakeDeafen and FakeMute no longer really deafen or mute you when they're on before you join a voice channel.
+
 ## Update of 2026-11-20 (with Endcord 4.1.2)
 
 The app stays 1.0.0 and installed copies update on their own. Everything in [Endcord 4.1.2](https://github.com/Endcord/Endcord/blob/main/CHANGELOG.md) is in it, and:
